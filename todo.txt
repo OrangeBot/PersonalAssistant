@@ -1,0 +1,44 @@
+1)Habits
+Core:
+
+
+Features:
+Default (habit action performed) = average(20-50 repetitions) confirmed action
+
+2) Stat collector
+Core:
+Telegram bot?
+Asks for missing stats
+
+3) Enhanced tasks
+Core:
+- Task failed
+- task timeout
+
+
+4) Balancer
+Core:
+Life should separate into
+ - thinking/planning
+ - routine
+ - work? creative, work on projects.
+
+Features:
+Balance routine + habits
+vs actions.
+
+5) Hierarchy
+Core:
+-lvl 1 actions - like complete driving school exercise
+-lvl 2 topics
+-lvl 3 projects. Like Boxing, Driving, Sex etc..
+
+Features:
+
+6) Focuses/perspectives
+You can only keep track
+Choose the most exciting things and be drived by them
+
+
+
+
