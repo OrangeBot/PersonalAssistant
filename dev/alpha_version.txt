@@ -1,0 +1,32 @@
+0) Separate responsibility areas
+What assistant can and cannot touch.
+Default - subfolder "personal assistant"
+
+
+1) Be able to process newly added tasks
+__What
+
+__How?
+options
+- feed?
+- detect myself via regular syncs?
+way 1) api.activity. Store
+
+2) Be in control of scheduling
+__What
+If regular task is overdue - reschedule it to next iteration.
+__How?
+
+3) Task Suggestions.
+__What
+add and remove tasks dynamically
+for each task have
+
+
+
+
+
+
+
+
+Killer features:

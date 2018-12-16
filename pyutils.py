@@ -1,3 +1,5 @@
+import threading
+
 def trim(l, s=None, e=None):
     if s is not None and l.startswith(s) and len(s) > 0:
         l = l[len(s):]
@@ -16,10 +18,10 @@ def write(what, where, mode='w'):
         return f.write(what)
 
 
-from resources import token_path
+from resources import default_token_path
 
 
-def get_token(path=token_path):
+def get_token(path=default_token_path):
     return read(path)
 
 
@@ -105,3 +107,7 @@ if __name__ == "__main__":
 """.format(func_name=name, args=', '.join(['args.' + arg for arg in argspec.args]))
 
     write(script_code, path)
+
+
+def run_bg(target, *args, **kwargs):
+    return threading.Thread(target, args=args, kwargs=kwargs)

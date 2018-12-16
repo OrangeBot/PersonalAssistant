@@ -1,0 +1,9 @@
+1) Project structure is a tree. ~Folder
+
+2) TagRepository
+For each task - its tags
+For each tag - its tasks
+
+
+
+
