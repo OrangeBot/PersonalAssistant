@@ -39,6 +39,12 @@ Features:
 You can only keep track
 Choose the most exciting things and be drived by them
 
+7) Telegram bot
+
+- reminders
+- statistics gatherings (weight, exercise)
+- getting questions (choose morning scenario)
+
 
 
 

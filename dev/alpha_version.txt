@@ -30,3 +30,21 @@ for each task have
 
 
 Killer features:
+
+- Reschedule regular task if its overdue for too long.
+Rule, version 1: left less than 24 hours and less than 1/3 of time.
+
+- add and remove random tasks from pool of non-repeated tasks
+Mark those tasks with special label (use on-line solution for now bcz it doesnt require me to implement anything).
+
+- dynamically increase and reduce load. balance load between cathegories
+Things that i NEED to do (todos)
+ROUTINES
+Other things
+    Gaming (what i want to do) / Relax / Reflecting on my life
+        - this is kinda between this, routines and 4t category
+    Organizational tasks / Establishing or polishing processes
+    Planning / Structuring / Managing my life / Analysing it
+
+
+

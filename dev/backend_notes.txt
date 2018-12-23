@@ -1,0 +1,4 @@
+Need to commit changes after each operation
+
+I'd better wait for 1 sec to accumulate all changes and then commit
+Actually, no, i should try to avoid parallellism in python because it slows everything

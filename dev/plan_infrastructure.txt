@@ -1,0 +1,22 @@
+Each personal assistant is tied to some todoist account.
+So let's store todoist tasks and projects in the PA object.
+
+# folder
+projects:
+    id -> project
+# task
+items:
+    id -> item
+
+don't forget to update everything after sync
+-items
+-projects
+
+don't forget to commit after changes.
+!! implement bulk commit. Consider setting max_limit after which it commits.
+- reschedule
+other
+- tag
+- change project
+- add comment
+
