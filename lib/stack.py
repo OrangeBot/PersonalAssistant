@@ -3,7 +3,8 @@ import time
 import datetime
 import defaults
 import os
-# from pyutils import run_bg
+from pyutils import run_bg
+from ..pyutils import connected_to_internet
 
 
 class Folder(object):
@@ -364,15 +365,18 @@ class PersonalAssistant(object):
         return any([path.startswith(p) for p in self._included_paths]) and not any(
             [path.startswith(p) for p in self._excluded_paths])
 
-    def connect_to_todoist(self, api_token):
-        import todoist
-        if api_token is None:
-            from resources import default_token_path
-            api_token = default_token_path
-        if os.path.exists(api_token):
-            from pyutils import get_token
-            api_token = get_token(api_token)
-        self._api = todoist.TodoistAPI(api_token)
+    def connect_to_todoist(self, api_token=None):
+        if connected_to_internet():
+            import todoist
+            if api_token is None:
+                from resources import default_token_path
+                api_token = default_token_path
+            if os.path.exists(api_token):
+                from pyutils import get_token
+                api_token = get_token(api_token)
+            self._api = todoist.TodoistAPI(api_token)
+        else:
+            raise NotImplementedError("Todo - mock todoist api client that behaves ")
 
     def sync_api(self):
         with self._lock:

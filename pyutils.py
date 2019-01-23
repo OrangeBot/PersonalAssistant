@@ -1,4 +1,8 @@
 import threading
+import requests
+
+REMOTE_SERVER = "www.google.com"
+
 
 def trim(l, s=None, e=None):
     if s is not None and l.startswith(s) and len(s) > 0:
@@ -111,3 +115,16 @@ if __name__ == "__main__":
 
 def run_bg(target, *args, **kwargs):
     return threading.Thread(target, args=args, kwargs=kwargs)
+
+
+def is_connected(hostname, timeout=2):
+    try:
+        requests.get(hostname, timeout=timeout)
+        return True
+    except requests.ConnectionError:
+        # print("No internet connection")
+        return False
+
+
+def connected_to_internet():
+    return is_connected(REMOTE_SERVER)
