@@ -1,7 +1,7 @@
 import threading
 import requests
 
-REMOTE_SERVER = "www.google.com"
+REMOTE_SERVER = "https://www.google.com"
 
 
 def trim(l, s=None, e=None):
