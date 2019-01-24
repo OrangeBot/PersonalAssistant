@@ -1,7 +1,0 @@
-rescanning all tasks every second is quite compute-heavy
-
-better to have event queue and triggers
-
-1) scheduled tasks triggers are easy to do - just kepp all tasks sorted and see when the nearest trigger is
-
-2) User events - how to detect? Does todoist api has triggers?
