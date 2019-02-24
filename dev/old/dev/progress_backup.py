@@ -1,3 +1,11 @@
+import threading
+import time
+import datetime
+import defaults
+import os
+from pyutils import run_bg
+from ..pyutils import connected_to_internet
+
 # # step 1, import todoist api
 import sys, os
 try:
@@ -32,8 +40,6 @@ import time
 import datetime
 
 import defaults
-
-
 class Folder(object):
     """sample project.data:
     {'is_favorite': 0,
@@ -260,7 +266,9 @@ class Task(object):
     #     task.is_repeated()
     def reschedule(self, due_time=None):
         print("Need to transform due time into todoist format")
+        #  todo: Need to transform due time into todoist format
         print("Need to learn how to schedule task to next time in todoist")
+        # todo: Need to learn how to schedule task to next time in todoist
         raise NotImplementedError
 
 
@@ -390,15 +398,18 @@ class PersonalAssistant(object):
         return any([path.startswith(p) for p in self._included_paths]) and not any(
             [path.startswith(p) for p in self._excluded_paths])
 
-    def connect_to_todoist(self, api_token):
-        import todoist
-        if api_token is None:
-            from dev.old.resources import default_token_path
-            api_token = default_token_path
-        if os.path.exists(api_token):
-            from pyutils import get_token
-            api_token = get_token(api_token)
-        self._api = todoist.TodoistAPI(api_token)
+    def connect_to_todoist(self, api_token=None):
+        if connected_to_internet():
+            import todoist
+            if api_token is None:
+                from resources import default_token_path
+                api_token = default_token_path
+            if os.path.exists(api_token):
+                from pyutils import get_token
+                api_token = get_token(api_token)
+            self._api = todoist.TodoistAPI(api_token)
+        else:
+            raise NotImplementedError("Todo - mock todoist api client that behaves ")
 
     def sync_api(self):
         with self._lock:
@@ -558,6 +569,326 @@ class PersonalAssistant(object):
 # ):
 #     if condition(task)
 
-self = PersonalAssistant()
+from pyutils import trim
+import string
 
 
+def dstrip(s):
+    return s.strip(string.whitespace + string.punctuation)
+
+
+def purify(s):
+    ps = None
+    while s != ps:
+        ps, s = s, trim(dstrip(s), 'and', 'and')
+    return s
+
+
+def chunkify(s, chunks=None, end=False):
+    beg = not end
+    result = []
+
+    s = purify(s)
+    ps = None
+    while s != ps:
+        ps = s
+        for chunk in chunks:
+            if (beg and s.startswith(chunk)) or (end and s.endswith(chunk)):
+                result.append(chunk)
+                s = purify(trim(s, chunk if beg else None, chunk if end else None))
+    return result, s
+
+
+def multisplit(s, seps=None):
+    if seps is None:
+        seps = ['and', ',']
+    import re  # Will be splitting on: , <space> - ! ? :
+    return list(filter(None, re.split('|'.join(seps), s)))
+
+
+def unwrap_list(l):
+    if len(l) == 0:
+        return None
+    if len(l) == 1:
+        return l[0]
+    return l
+
+
+def cast_time(timestamp):
+    if type(timestamp) is datetime.time:
+        return timestamp
+    if type(timestamp) is datetime.datetime:
+        return timestamp.time()
+    if type(timestamp) is str:
+        return dateutil.parser.parse(timestamp).time()
+    raise RuntimeError("Unable to cast to time object of type {}: {}".format(type(timestamp), timestamp))
+
+
+def cast_date(date):
+    if type(date) is datetime.date:
+        return date
+    if type(date) is datetime.datetime:
+        return date.date()
+    if type(date) is str:
+        return dateutil.parser.parse(date).date()
+    raise RuntimeError("Unable to cast to date object of type {}: {}".format(type(date), date))
+
+
+def parse_repeat_schedule(date_string, debug=False):
+    if debug:
+        original_string = date_string
+    date_string = date_string.lower()
+    date_string = trim(date_string, "every")
+    result = dict(
+        relative=date_string.startswith('!'),
+        specific_time=None,
+        days_of_week=None,
+        period=None
+    )
+    date_string = trim(date_string, '!')
+    # "every(!)" part done.
+
+    if " at " in date_string:
+        date_string, specific_time = date_string.split(' at ')
+        result['specific_time'] = sorted([cast_time(t) for t in multisplit(specific_time)])
+
+    date_string = dstrip(date_string)
+
+    # 1) quick period
+    time_intervals = ['hour', 'hours', 'minute', 'minutes', 'day', 'days', 'weeks', 'week', 'month', 'months', 'year',
+                      'years']
+    weekdays = ['mon', 'tue', 'wed', 'thu', 'fri']
+    weekend = ['sat', 'sun']
+    week = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+    for ti in time_intervals:
+        if date_string.endswith(ti):
+            if debug:
+                print(date_string)
+            try:
+                l = trim(date_string, e=ti).strip()
+                if l == "":
+                    l = "1"
+                num = int(l)
+            except:
+                continue
+            # try:
+            #     result['period'] = datetime.timedelta(**{trim(ti, e='s')+'s': num})
+            # except:
+            result['period'] = dict(unit=trim(ti, e='s') + 's', value=num)
+            return result
+
+    # if date_string in ['hour','minute','day','week','month']:
+    #     result['period'] = datetime.timedelta(**{date_string+'s':1})
+    #     return result
+    if date_string == "weekday":
+        result['days_of_week'] = weekdays
+        return result
+    if date_string == "weekend":
+        result['days_of_week'] = weekend
+        return result
+
+    # 2)
+    # mon, tue, wed, thu, fri, sat, sun
+    # todo
+    days, date_string = chunkify(date_string, week)
+    result['days_of_week'] = days if len(days) != 0 else None
+    if len(date_string) == 0:
+        return result
+    else:
+        if debug:
+            print("Something left out after parsing:", date_string)
+
+            # print("Unable to parse\nOriginal string: {}\nRemaining string:{}\nResult:{}".format(original_string, date_string, result))
+        try:
+
+            if debug:
+                print("Known case: time without 'at' part. Trying")
+            result['specific_time'] = sorted([cast_time(t) for t in multisplit(date_string)])
+        except:
+            if debug:
+                print("Failed")
+    return result
+
+
+from dateutil import parser
+
+# string.printable
+import datetime
+from dateutil import utils
+
+
+# utils.datetime(datetime.datetime.now())
+
+def cast_datetime(source, debug=False):
+    if debug:
+        print("Casting to datetime")
+    if type(source) is datetime.datetime:
+        if debug:
+            print("Recognized datetime, returning as is")
+        return source
+    if type(source) is str:
+        try:
+            if debug:
+                print("Got string, trying parsing with dateutil.parser")
+            d = dateutil.parser.parse(source)
+            if debug:
+                print("Parsing successful")
+            if 1900 < d.year and d.year < 2050:
+                return d
+            elif debug:
+                print("Seems parsing went wrong - date year out of range:", d.year)
+        except Exception as e:
+            if debug:
+                print("Parsing failed, error:", e)
+    try:
+        d = datetime.datetime(source)
+        if 1900 < d.year and d.year < 2050:
+            return d
+    except:
+        pass
+    return source
+
+
+# datetime.datetim e.from(datetime.datetime.now())
+
+# import re
+# s = "8 hours"
+# re.findall(r"(\d+)", s)
+
+# def get_next_shedule_date(schedule, due_time=None):
+#     if due_time is None:
+#         due_time = datetime.datetime.now(tz=datetime.timezone.utc)
+#
+#     # if current_date is None:
+#     #     current_date = datetime.datetime.now(tz=datetime.timezone.utc)
+
+def get_reschedule_date(schedule, due_time=None):
+    """
+    case 0: task is not overdue. Just follow the schedule and see when is next instance
+    case 1: every! 8 hours
+    :param schedule:
+    :param due_time:
+    :return:
+    """
+    current_time = datetime.datetime.now(tz=datetime.timezone.utc)
+    if due_time is None or current_time < cast_datetime(due_time):
+
+        due_time = cast_datetime(due_time) or current_time
+        raise NotImplementedError
+    else:
+        # select nearest next instance after current_time
+        next_schedule = due_time
+        while next_schedule < current_time:
+            raise NotImplementedError
+
+
+# def simple_follow_schedule:
+# if period is not None:
+# period time - return
+# period date
+# if specific time
+
+
+def advanced_schedule():
+    # allowed_intervals
+    # while datetime not in allowed interval -
+
+    #
+    raise NotImplementedError
+
+
+def shift_date_month(date, num_months):
+    y, m, d = date.year + (date.month + num_months - 1) // 12, (date.month + num_months - 1) % 12 + 1, date.day
+    while True:
+        try:
+            return date.replace(year=y, month=m, day=d)
+        except ValueError:
+            d = d - 1
+
+
+def next_time(time, allowed_times):
+    for target_time in allowed_times:
+        if cast_time(time) < cast_time(target_time):
+            return cast_time(target_time)
+    return None
+
+
+def simple_follow_schedule(schedule, due_time, debug=False):
+    import datetime
+    import dateutil
+    # define date and time separately
+    result_date = None
+    result_time = None
+    if schedule['period'] is not None:
+        period = schedule['period']
+        if period['unit'] in ['minutes', 'hours']:
+            return due_time + datetime.timedelta(**{period['unit']: period['value']})
+        # if today - need to check allowed time
+        else:  # period['unit'] in ['days','weeks','months']:
+            allowed_times = schedule['specific_time']
+            if allowed_times is not None:
+                time = next_time(due_time, allowed_times)
+                if time is not None:
+                    return datetime.datetime.combine(due_time.date(), time)
+                result_time = allowed_times[0]  # move to next date
+            else:
+                # same time
+                result_time = cast_time(due_time)
+            unit = period['unit']
+            value = period['value']
+            if unit == 'weeks':
+                value = value * 7
+                unit = 'days'
+            if unit == 'months':
+                # date = cast_date(shift_date_month(due_time, period['num']))
+                result_date = shift_date_month(due_time.date(), value)
+            else:
+                # date = cast_date(due_time) + datetime.timedelta(**{period['unit']:period['value']})
+                result_date = due_time + datetime.timedelta(**{unit: value})
+    else:
+        # no period
+        days_of_week = schedule['days_of_week']
+        if days_of_week is None:
+            raise RuntimeError("Schedule is not properly defined: {}".format(schedule))
+            # now magic happens:
+        candiDates = list(sorted([dateutil.parser.parse(wd, default=due_time) for wd in days_of_week]))
+        if len(candiDates) == 1:
+            candiDates += [dateutil.parser.parse(days_of_week[0], default=due_time + datetime.timedelta(days=7)), ]
+        if debug:
+            print("candiDates", candiDates, type(candiDates))
+        allowed_times = schedule['specific_time']
+        if debug:
+            print("allowed_times", allowed_times, type(allowed_times))
+        today = cast_date(due_time)
+        if debug:
+            print("today", today, type(today))
+        if allowed_times is None:
+            result_time = cast_time(due_time)
+            result_date = cast_date(candiDates[0])
+            if result_date == today:
+                result_date = cast_date(candiDates[1])
+        else:
+            result_date = cast_date(candiDates[0])
+            result_time = allowed_times[0]
+            # if date is today - need to check time.
+            if result_date == today:
+                result_time = next_time(due_time, allowed_times)
+                if debug:
+                    print("result_time", result_time, type(result_time))
+                if result_time is None:
+                    result_time = allowed_times[0]
+                    result_date = cast_date(candiDates[1])
+            # else - if date is not today - need to check time too.
+
+    #         import datetime
+    # def next_weekday(d, weekday):
+    #     days_ahead = weekday - d.weekday()
+    #     if days_ahead <= 0: # Target day already happened this week
+    #         days_ahead += 7
+    #     return d + datetime.timedelta(days_ahead)
+    #
+    # d = datetime.date(2011, 7, 2)
+    # next_monday = next_weekday(d, 0) # 0 = Monday, 1=Tuesday, 2=Wednesday...
+    # print(next_monday)
+    return datetime.datetime.combine(result_date, result_time)

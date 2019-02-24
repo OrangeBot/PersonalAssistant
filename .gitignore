@@ -1,4 +1,6 @@
 todoist.token
 .idea
 *.pyc
+__pycache__
 dev/test/data
+.ipynb_checkpoints

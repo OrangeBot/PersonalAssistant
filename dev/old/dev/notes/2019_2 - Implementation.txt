@@ -1,0 +1,8 @@
+1) First thing to implement - todoist integration
+2) Second thing to implement - telegram integration
+
+Feature requests
+- quick add task. Throw in and forget. Get reminder of unfinished task
+- add task processing rules. Python injection?
+
+- export-import to text.
