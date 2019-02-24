@@ -2,3 +2,4 @@ todoist.token
 .idea
 *.pyc
 dev/test/data
+.DS_Store
