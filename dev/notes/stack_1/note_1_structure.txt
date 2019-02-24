@@ -1,0 +1,44 @@
+PersonalAssistant
+	__main__  #
+
+Other notes
+1) Mocks. For python api
+
+
+Hierarchy
+    1) Scheduler
+        Scheduled events - pd.Series(EventQueue[ts])
+        (Un)expected events -
+    2)
+    3) Basic data structures - dict(record[id]), pd.Series(record[ts])
+
+Plugins/Modules/Components
+	core - record
+		task
+		folder
+		note
+	Balancer (generic, across several categories)
+		Dependencies:
+	1-Todoist
+	2-Telegram
+	3-DataCompleter (request from user)
+	3-DataGuesser (derive automatically)
+	1-Rescheduler? Scheduler?
+
+	# other - just ideas, no tech implementation in mind
+	CLI - command line api for complex operations
+	Stats - skips, completions, time
+
+Protobuf specs
+    core
+        creation time
+        user update time
+    task
+        due time
+
+
+
+
+
+Need to check
+1. Can pycharm handle relative imports?

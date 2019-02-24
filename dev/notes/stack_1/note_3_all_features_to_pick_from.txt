@@ -1,0 +1,41 @@
+1) Cancel tasks
+So that you could say "won't do" without deleting it.
+This is psychologically more comfortable. And you might
+    Todoist: tag "cancel"? Just delete - no, then cant delete trash?
+
+2) Skip a task.
+So that you could say "won't do it right now" without thinking about when - and it won't get lost.
+    Todoist: tag "skip"? Remove date? Project -> Inbox?
+
+3) Pick up new tasks and autocomplete most of them
+    Issue: what if we
+
+4) Balance across routine, what i need to do and
+    Dependencies: 5, 6
+
+5) Data requester. Via telegram
+
+6) Task Orchestrator - add and remove task from scope.
+    How: via due time?
+
+
+
+
+O Inner mechanics
+1) Data - value, provider
+
+
+I Task Info Categories
+1) How long would it take to complete
+    - default 5 min?
+    - Track history. How to?
+        - completion time -
+2)
+
+
+II Misconceptions/Messes to figure out
+    - due time:
+        By Omnifocus it is deadline. When task has to be finished
+        By todoist it is when task has to be started?
+        My scheme: Start time -> todoist due time, Deadline - track internally
+

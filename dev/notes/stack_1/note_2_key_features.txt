@@ -1,0 +1,27 @@
+1) Hard limit number of tasks in focus
+
+2) Set up goals for categories (for starters - exercise)
+2*) Establish Habits
+
+3) Handle most of inbox automatically.
+
+4) Choose morning routine. Automatically
+
+5) Day Stages
+5*) Day stages enforcement/reminder.
+
+
+
+----------------
+Required functionality
+
+1) Hard limit number of tasks in focus
+Simple: todoist plugin. Reschedule regular tasks, pop out scheduled
+Smart:
+    concepts: Priorities. Categories
+    modules: DataGuessing, DataRequester. Balancer
+
+2) Set up goals for categories (for starters - exercise)
+Simple: todoist plugin, stats plugin
+Smart, *:
+    Habits Plugin.

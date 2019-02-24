@@ -1,0 +1,9 @@
+Why is this all so difficult
+
+1) todoist v 0.1
+    - track updates. store them. access them afterwards.
+    - can todoist listen to updates or just poll regularly?
+
+2) ???
+3) protobuf builder
+4) how to import my own pyutils

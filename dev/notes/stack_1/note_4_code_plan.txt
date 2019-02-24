@@ -1,0 +1,14 @@
+What i need
+) sheduling engine
+    queue processor
+
+
+) dumper/loader
+
+) plugin loader - thing that will plug in plugins
+    plugin_loader.config - plugin_name(str): plugin_active(bool)
+
+) plugins
+    protobuf
+    populate_queue - initial task sheduling
+
