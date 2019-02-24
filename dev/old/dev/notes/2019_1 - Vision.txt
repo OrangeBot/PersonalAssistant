@@ -1,0 +1,41 @@
+Task tracker engine.
+Allow for multiple, independent, moduled task tracking apps to be developed
+
+Core
+    protobuf?
+
+Embodiments
+1) Personal assistant. Quick add. Auto-guess some fields, request missing.
+2) Integrator - with todoist and other api-friendly
+3) Talker - Alice-like? Fancy lingua-leo-like notifications
+4) Telegram chat-bot
+5) Perceptionist
+6) CLI
+7) Achiever. Karma/achievement-like
+8) Balancer - 'work-life' balance. Balanced life
+9) Note organizer. Mind map. Thought organizer. Harry Potter mind well
+10) Gamifyer
+    Earning points
+    Chain task completion/combo for more points
+11) Habits creation
+
+Modules
+1)
+
+GUIs
+1) CLI
+2) Universal
+3)
+
+
+id
+    task (completable?)
+        project - hybrid task/folder?
+    folder
+    note
+
+plugins
+    tags
+
+Philsophy
+1) Good UI is like good CheGeKa answer - you have no idea what it is until you see it and see that it fits incredibly

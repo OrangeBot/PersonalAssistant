@@ -1,0 +1,25 @@
+1) Not only to-do sevice - also notes (mind map?)
+Database - ?
+one object (thought) - several representations
+Different representations for different hierarchies
+
+3) gui. Language - python?
+Graph. Vertices and edges.
+3.1) Omnifocus-like perspectives. Choose node to focus on all its
+3.2) Omnifocus-like task order - parallel, consequential, mixed
+
+2) telegram bot
+2-3 channels.
+1 channel - "reminder" - notification always on. Send out important alerts distingushed from common feed
+2 channel - "waiter" - used to track different Milestone events - woke up, lunch, left home, left work, arrived home
+3 channel - "interactor"
+
+
+4) Task functionality
+cancel +/ skip
+
+5) Statistics.
+Adjust recurring task frequency based on actual completion frequency
+numerical statistic. Select several data series to keep track of. Poll frequency. Request missing via interactor.
+
+6) Same task might be in different folders simultaneously

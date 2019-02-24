@@ -1,0 +1,53 @@
+So i need to somehow organize everything
+
+Protobuf is good because it enforces structure
+
+Also, it makes storing data on disk quite straightforward.
+You will inevitably pay the tech cost - youll have to parse protobuf
+
+Another alternative -
+
+What is advantage of protobuf?
+Multi-language support. Do i need it?
+I dont know i dont see any
+
+It's good to always be able to send around your data.
+
+So how will everything look if there is protobuf?
+
+
+Another option is to store everything in sql.
+Why?
+We just need to store data in columns
+
+But, actually, we only need to save and load tables on startup and shutdown.
+
+If i have everything in protobuf i always know what to save and what to load.
+
+
+
+So the trick is:
+I plan to change everything a lot.
+Protobuf backward compatibility flexibility sounds awesome...
+
+
+
+
+
+-----------------------------------------------------------------
+What do i need protobuf for?
+1) To save assistant state on the disk.
+    - Other options: pickle. get_state - returns... dict? set state fills everything present. Problems with pickle: easy to miss something.
+    Need to design safety system on my own, inspired by, basically,
+2) To impose some structure. Clear structure.
+
+Can i continue this project or i need to start over?
+Starting over is bullshit - i did it so many times already. It leads to very long development.
+On other hand, it allows to start with a clear mind.
+
+I'd be glad to have a plan somewhere..
+I guess i need one before i start
+I shouldnt commit files that
+
+Would be nice to have something like ya make to see if everything works.
+Is there such
