@@ -37,8 +37,6 @@ updates = api.activity
 
 sample_item = api.items.all()[0]
 
-from pyutils import dump_json, load_json
-
 settings = {'permitted_paths':}
 
 import threading
@@ -176,7 +174,7 @@ class PersonalAssistant(object):
     def connect_to_todoist(self, api_token):
         import todoist
         if api_token is None:
-            from resources import default_token_path
+            from dev.old.resources import default_token_path
             api_token = default_token_path
         if os.path.exists(api_token):
             from pyutils import get_token

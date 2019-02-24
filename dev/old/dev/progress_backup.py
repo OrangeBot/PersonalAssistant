@@ -1,5 +1,4 @@
 # # step 1, import todoist api
-from todoist.api import TodoistAPI
 import sys, os
 try:
     lib_path = os.path.abspath(__file__)
@@ -33,8 +32,6 @@ import time
 import datetime
 
 import defaults
-
-from pyutils import run_bg
 
 
 class Folder(object):
@@ -396,7 +393,7 @@ class PersonalAssistant(object):
     def connect_to_todoist(self, api_token):
         import todoist
         if api_token is None:
-            from resources import default_token_path
+            from dev.old.resources import default_token_path
             api_token = default_token_path
         if os.path.exists(api_token):
             from pyutils import get_token
