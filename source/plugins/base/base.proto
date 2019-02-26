@@ -1,4 +1,0 @@
-message base {
-    string Uid;
-    repeated string Plugins;
-}

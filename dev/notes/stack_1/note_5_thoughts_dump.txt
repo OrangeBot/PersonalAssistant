@@ -3,7 +3,16 @@ Why is this all so difficult
 1) todoist v 0.1
     - track updates. store them. access them afterwards.
     - can todoist listen to updates or just poll regularly?
+        Can listen but declared unreliable.
+        step 1 - poll once a second
+        step 2 also listen in between
+        step 3 - poll once a minute, listen in between
 
 2) ???
 3) protobuf builder
-4) how to import my own pyutils
+Done 4) how to import my own pyutils
+5) telegram
+    - day stages/flags/triggers/events - need config
+    - main pipeline button interactor - output
+    - open form interactor - input
+

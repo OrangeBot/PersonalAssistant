@@ -1,0 +1,7 @@
+message CoreConfig {
+    message TPluginDescription {
+        string PluginName = 1;
+        bool IsActive = 2[default = true];
+    }
+    repeated TPluginDescription Plugins;
+}
