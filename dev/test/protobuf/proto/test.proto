@@ -1,0 +1,6 @@
+syntax = "proto2"; // I have experience with proto2 syntax at work so I'll use it
+
+message TTest {
+    optional string Uid = 1;
+    repeated string Plugins = 2;
+}

@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+message TTodoistConfig {
+    //    optional string ApiToken = 1;
+    repeated string AllowedPaths = 1; // paths that PersonalAssistant is allowed to process
+    optional int32 WebhookServerPort = 2 [default = 8080];
+}

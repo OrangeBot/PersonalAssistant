@@ -1,0 +1,6 @@
+# Textual representation of a protocol buffer.
+# This is *not* the binary format used on the wire.
+person {
+  name: "John Doe"
+  email: "jdoe@example.com"
+}

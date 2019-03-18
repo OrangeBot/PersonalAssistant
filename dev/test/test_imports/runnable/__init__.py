@@ -8,4 +8,7 @@ def main():
 
 
 if __name__ == '__main__':
+    from .libzz import test
+
+    test()
     main()

@@ -1,0 +1,6 @@
+syntax = "proto2";
+
+message TPluginItemDesctription {
+    optional string Plugin = 1;
+    optional string Name = 2;
+}

@@ -1,0 +1,10 @@
+So what we have?
+
+Task, whatever that is
+time
+id
+
+What do we need id for? To remove task later.
+
+So we want to have a queue sorted by time - to determine the next task to execute
+and also to have a queue ordered by id or accessed by id to be able to access and therefore remove that task efficiently

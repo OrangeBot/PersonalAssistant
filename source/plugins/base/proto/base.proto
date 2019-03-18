@@ -1,4 +1,0 @@
-message TBase {
-    string Uid;
-    repeated string Plugins;  // plugins that are
-}

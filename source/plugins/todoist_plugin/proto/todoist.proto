@@ -1,0 +1,17 @@
+syntax = "proto2";
+import "google/protobuf/timestamp.proto";
+
+message TTodoistTask {
+    optional string Uid = 1;
+    optional string TodoistId = 2;
+    optional string Schedule = 3;
+    optional google.protobuf.Timestamp DueDate = 4;
+    optional string Parent = 5; // parent Uid
+}
+
+message TTodoistProject {
+    optional string Uid = 1;
+    optional string TodoistId = 2;
+    optional string Name = 3;
+    optional string Parent = 4;
+}

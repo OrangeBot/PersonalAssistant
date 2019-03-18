@@ -1,240 +1,9 @@
+import os
 import threading
 import time
+
 import defaults
-import os
-from ..pyutils import connected_to_internet
-
-
-class Folder(object):
-    """sample project.data:
-    {'is_favorite': 0,
-     'color': 21,
-     'collapsed': 0,
-     'id': 2201412629,
-     'indent': 1,
-     'name': 'personal assistant',
-     'has_more_notes': False,
-     'is_deleted': 0,
-     'parent_id': 2183890184,
-     'item_order': 52,
-     'shared': False,
-     'is_archived': 0}
-    """
-
-    def __init__(self, project, assistant=None):
-        self._todoist_id = project.data['id']
-
-        self._assistant = assistant
-        self._children = set()
-        self._tasks = set()
-
-    @property
-    def personal_assistant(self):
-        if self._assistant is None:
-            return defaults.assistant
-        else:
-            return self._assistant
-
-    pa = personal_assistant
-
-    def update_parent_id(self, new_id, commit=True):
-        # todo:
-        print("WARNING: This modifies actual value on server, need to emphasise that in the name of the method!!!")
-        self.project.update(parent_id=new_id)
-        if commit:
-            self.api.commit()
-
-    @property
-    def id(self):
-        return self._todoist_id
-
-    @property
-    def project(self):
-        return self.pa.get_project(self.id)
-
-    @property
-    def path(self):
-        if self.parent_id is None:
-            return self.name
-        else:
-            return "{}/{}".format(self.parent.path, self.name)
-
-    @property
-    def name(self):
-        return self.project.data['name']
-
-    @property
-    def api(self):
-        return self.pa.api
-
-    @property
-    def parent_id(self):
-        return self.project.data['parent_id']
-
-    @property
-    def parent(self):
-        if self.parent_id is None:
-            return None
-        return self.pa.get_folder(self.parent_id)
-
-    def register_task(self, task):
-        self._tasks.add(task.id)
-
-    def unregister_task(self, task):
-        self._tasks.remove(task.id)
-
-    def register_child(self, folder):
-        self._children.add(folder.id)
-
-    def unregister_child(self, folder):
-        self._children.remove(folder.id)
-
-    @property
-    def children(self):
-        return [self.pa.get_folder(p) for p in self._children]
-
-    @property
-    def tasks(self):
-        return [self.pa.get_task(t) for t in self._tasks]
-
-
-import dateutil
-
-
-class Task(object):
-    """sample item.data
-    {'day_order': -1,
-     'assigned_by_uid': 4405058,
-     'is_archived': 0,
-     'labels': [2149331073],
-     'sync_id': None,
-     'all_day': False,
-     'in_history': 0,
-     'date_added': 'Fri 12 Jun 2015 17:21:12 +0000',
-     'indent': 1,
-     'date_lang': None,
-     'id': 7104735,
-     'priority': 2,
-     'checked': 0,
-     'user_id': 4405058,
-     'has_more_notes': False,
-     'due_date_utc': 'Thu 30 Aug 2018 20:59:59 +0000'
-     'content': 'ирригатор',
-     'parent_id': None,
-     'item_order': 1,
-     'is_deleted': 0,
-     'responsible_uid': None,
-     'project_id': 143126188,
-     'date_completed': None,
-     'collapsed': 0,
-     'date_string': "every 2 weeks"}
-    """
-
-    def __init__(self, item, personal_assistant=None):
-        self._assistant = personal_assistant
-
-        # if item is not None:
-        self._todoist_id = item.data['id']
-        # else:
-        #     self.create_todoist_task()
-
-        self._children = set()
-
-        self.processed = False
-
-        self._pa_repeat_rule = None
-
-    @property
-    def parent_id(self):
-        return self.item.data['parent_id']
-
-    @property
-    def project_id(self):
-        return self.item.data['project_id']
-
-    @property
-    def id(self):
-        return self._todoist_id
-
-    # @property #probably better off going directly folder->project
-    # def project(self):
-    #     return self.folder.project
-
-    @property
-    def folder(self):
-        return self.pa.get_folder(self.project_id)
-
-    @property
-    def parent(self):
-        if self.parent_id is None:
-            return None
-        return self.pa.get_task(self.parent_id)
-
-    @property
-    def personal_assistant(self):
-        if self._assistant is None:
-            return defaults.assistant
-        return self._assistant
-
-    pa = personal_assistant
-
-    @property
-    def item(self):
-        return self.pa.get_item(self.id)
-
-    # def create_todoist_task(self):
-
-    @property
-    def folder_path(self):
-        return self.folder.path
-
-    # ---------------------------------------------
-    # ok, here fancy stuff begins
-    def get_next_due_time(self):
-        """
-        :return: python datetime
-        """
-        # todo: output
-        if self._pa_repeat_rule is not None:
-            print("At some point PA should take control over scheduling, providing more flexible rules")
-            raise NotImplementedError
-        else:
-            if not self.is_repeated():
-                raise RuntimeError("Requesting next due time from non-repeated task")
-            print("Need to understand how to get next due date from todoist...")
-
-    def get_due_time(self, todoist_format=False):
-        if todoist_format:
-            return self.due_date_utc
-        else:
-            return dateutil.parser.parse(self.due_date_utc)
-
-    @property
-    def due_date_utc(self):
-        # 'due_date_utc': 'Thu 30 Aug 2018 20:59:59 +0000'
-        return self.item.data['due_date_utc']
-
-    @property
-    def date_string(self):
-        return self.item.data['date_string']
-
-    def is_repeated(self):
-        if self._pa_repeat_rule is not None:
-            return True
-        return self.date_string is not None and self.date_string.lower().startswith('every')
-
-        # next_time = task.get_next_due_time()
-
-    # due_time = task.get_due_time()
-    # current_time = datetime.datetime.now()
-    # return (
-    #     task.is_repeated()
-    def reschedule(self, due_time=None):
-        print("Need to transform due time into todoist format")
-        #  todo: Need to transform due time into todoist format
-        print("Need to learn how to schedule task to next time in todoist")
-        # todo: Need to learn how to schedule task to next time in todoist
-        raise NotImplementedError
+from pyutils import connected_to_internet
 
 
 class PersonalAssistant(object):
@@ -338,7 +107,6 @@ class PersonalAssistant(object):
     def configure_permitted_paths(self, permitted_paths=None):
         # 1) define what i can touch and what i can't
         # settings_path = os.path.join()
-        permitted_paths = None
         if permitted_paths is None:
             try:
                 permitted_paths = raw_input("""
@@ -362,6 +130,19 @@ class PersonalAssistant(object):
     def path_is_permitted(self, path):
         return any([path.startswith(p) for p in self._included_paths]) and not any(
             [path.startswith(p) for p in self._excluded_paths])
+
+    @property
+    def permitted_tasks(self):
+        import itertools
+        return itertools.chain(*[folder.tasks for folder in self.permitted_folders])
+        # return [task for task in self.tasks if self.task_is_permitted(task)]
+
+    @property
+    def permitted_folders(self):
+        return [folder for folder in self.folders if self.path_is_permitted(folder.path)]
+
+    def task_is_permitted(self, task):
+        return self.path_is_permitted(task.folder_path)
 
     def connect_to_todoist(self, api_token=None):
         if connected_to_internet():
@@ -430,6 +211,14 @@ class PersonalAssistant(object):
             self.sync_api()
         return self._api
 
+    def get_updated_tasks(self):
+        updates = self._api.activity
+        return updates
+
+    def get_unprocessed_tasks(self):
+        return [task for task in self.tasks if task.project.path_is_permitted and not task.processed]
+
+
     def launch_assistant(self, bg=False):
         if not self.check_assistant_status():
             self.run_assistant = True
@@ -469,16 +258,6 @@ class PersonalAssistant(object):
         with self._lock:
             self._run_assistant = value
 
-    def get_updated_tasks(self):
-        updates = self._api.activity
-        return updates
-
-    def get_unprocessed_tasks(self):
-        return [task for task in self.tasks if task.project.path_is_permitted and not task.processed]
-
-    @property
-    def tasks(self):
-        return self._tasks
 
     # def create_project(self, name, parent):
     #
@@ -501,19 +280,6 @@ class PersonalAssistant(object):
         for task in self.permitted_tasks:
             if PersonalAssistant.default_overdue_reschedule_condition(task):
                 task.reschedule()
-
-    @property
-    def permitted_tasks(self):
-        import itertools
-        return itertools.chain(*[folder.tasks for folder in self.permitted_folders])
-        # return [task for task in self.tasks if self.task_is_permitted(task)]
-
-    @property
-    def permitted_folders(self):
-        return [folder for folder in self.folders if self.path_is_permitted(folder.path)]
-
-    def task_is_permitted(self, task):
-        return self.path_is_permitted(task.folder_path)
 
     @staticmethod
     def default_overdue_reschedule_condition(task):

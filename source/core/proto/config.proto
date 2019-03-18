@@ -1,7 +1,11 @@
-message CoreConfig {
+syntax = "proto2";
+
+message TPersonalAssistantConfig {
     message TPluginDescription {
-        string PluginName = 1;
-        bool IsActive = 2[default = true];
+        optional string Name = 1; // maybe use enum here
+        optional bool IsActive = 2 [default = true];
+        optional string ConfigPath = 3; // todo: pass to constructor if present
     }
-    repeated TPluginDescription Plugins;
+    repeated TPluginDescription Plugins = 1;
+    optional string AppDataPath = 2;
 }

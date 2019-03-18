@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+message TTask {
+    optional string Uid = 1;
+    optional string Text = 2; // task text.
+    optional string Name = 3; // optional - task name for faster reference
+}
