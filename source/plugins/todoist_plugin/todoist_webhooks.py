@@ -1,11 +1,18 @@
 import json
 import logging
 
-import http.server
+from pyutils import is_python_3
+
+if is_python_3():
+    # py3:
+    from http.server import BaseHTTPRequestHandler
+else:
+    # py2:
+    from BaseHTTPServer import BaseHTTPRequestHandler
 
 
 def get_todoist_webhook_handler(callback):
-    class TodoistWebhookHandler(http.server.BaseHTTPRequestHandler):
+    class TodoistWebhookHandler(BaseHTTPRequestHandler):
         def _set_headers(self):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')

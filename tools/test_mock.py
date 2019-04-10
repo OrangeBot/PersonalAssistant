@@ -1,34 +1,31 @@
 #!/usr/bin/env python
-import argparse
-import todoist
-import os
+from __future__ import print_function
 
+import os
 import sys
 
-unix_lib_path = os.path.expanduser("~/work/pa/PersonalAssistant")
-win_lib_path = 'C:\\Users\\Petr\\Desktop\\HomeAutomation\\PersonalAssistant'
+import todoist
 
-
-def is_unix():
-    val = os.path.join('_', '_')
-    return val == "_/_"
-
+sys.path.append('/Users/plavrov/work/pyutils/')
+from pyutils import is_unix, is_python_3
 
 if is_unix():
-    if unix_lib_path not in sys.path:
-        sys.path.append(unix_lib_path)
+    lib_root = "/Users/plavrov/work/PersonalAssistant"
 else:
-    if win_lib_path not in sys.path:
-        sys.path.append(win_lib_path)
+    lib_root = "C:\\Users\\Petr\\Desktop\\HomeAutomation\\PersonalAssistant"
+
+sys.path.append(lib_root)
 
 
 def main():
     prototype = todoist.TodoistAPI()
-    from resources import lib_root
     engine = 'pkl'  # 'json' or 'pkl'
-    mock_path = os.path.join(lib_root, 'resources', 'mock_TodoistAPI.{engine}'.format(engine=engine))
+    mock_path = os.path.join(lib_root, 'app_data', 'mock_TodoistAPI_py{}.{}'.format('3' if is_python_3() else '2', engine))
     from pyutils import Mock
     mock_api = Mock(prototype, dump_path=mock_path, dump_engine=engine)
+
+    print("Following fields are mocked:")
+    print(mock_api.mock.keys())
 
     # now do sample requests
     print("Sync:\n", mock_api.sync().__repr__()[:200])

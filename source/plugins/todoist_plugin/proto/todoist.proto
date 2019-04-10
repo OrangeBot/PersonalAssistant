@@ -4,9 +4,10 @@ import "google/protobuf/timestamp.proto";
 message TTodoistTask {
     optional string Uid = 1;
     optional string TodoistId = 2;
-    optional string Schedule = 3;
-    optional google.protobuf.Timestamp DueDate = 4;
-    optional string Parent = 5; // parent Uid
+    optional string Text = 3;
+    optional string Schedule = 4;
+    optional google.protobuf.Timestamp DueDate = 5;
+    optional string Parent = 6; // parent Uid - project or task?
 }
 
 message TTodoistProject {

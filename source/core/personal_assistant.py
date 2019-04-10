@@ -4,11 +4,12 @@ import os
 import threading
 
 from pyutils import run_bg
+from typing import Iterable
 
 from proto.config_pb2 import TPersonalAssistantConfig
 from scheduler import Scheduler
 from source.lib.common import load_config
-from source.plugins import Uid, Task, Folder, Todoist, Plugin
+from source.plugins import Uid, Task, Folder, Todoist, Plugin, CLI
 
 LOG = logging.getLogger()
 
@@ -26,6 +27,7 @@ PluginMap = {'uid': Uid,
              'task': Task,
              'folder': Folder,
              'todoist': Todoist,
+             'cli': CLI,
              'base_plugin': Plugin}
 
 
@@ -77,8 +79,13 @@ class PersonalAssistant(object):
                     self._callback_ringbell.wait(timeout=timeout)
                     # do what is needed (run target task)
                     task = self.scheduler.get_next_task()
-                    task()
+                    result = task()
+                    if task.is_recurring:
+                        assert result is not None, "Recurring task should return timestamp of next occurence."  # todo: check that result is a valid timestamp
+                        self.scheduler.add_task(callback=task.callback, )
+                        # todo: add task_id to corresponding plugin?
                     self.scheduler.remove_task(task.id)
+                    # todo: add recurrent flag for task. if task is recurrent
 
     def shutdown(self):
         self.active = False
@@ -87,7 +94,7 @@ class PersonalAssistant(object):
     # properties
     @property
     def plugins(self):
-        # type: () -> Plugin
+        # type: () -> Iterable[Plugin]
         """
         :return:
         :return type:

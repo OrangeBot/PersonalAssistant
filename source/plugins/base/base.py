@@ -3,12 +3,14 @@ import os
 from collections import defaultdict
 
 import google
+import six
 from pyutils import to_snake_case, WARN, trim, to_camel_case
-from typing import Set
 
-from source.core.personal_assistant import PluginMap
 from source.lib.common import load_protos, dump_protos, load_config
 from source.plugins.base.proto.plugin_item_desctription_pb2 import TPluginItemDesctription
+
+
+# from typing import Set
 
 
 class ProtobufInheritanceMeta(type):
@@ -38,8 +40,8 @@ class ProtobufInheritanceMeta(type):
                         cls.__name__)
                     message += "def __init__(self, {}):\n".format(
                         ', '.join("{}=None".format(to_snake_case(f)) for f in cls.proto_fields))
-                    message += "    self._proto = self.proto_type({})".format(
-                        ', '.join("{}={}".format(f, to_snake_case(f)) for f in cls.proto_fields))
+                    message += "    super({}, self).__init__({})".format(cls.__name__,
+                                                                         ', '.join("{}={}".format(to_snake_case(f), to_snake_case(f)) for f in cls.proto_fields))
                     for f in missing_fields:
                         message += """
 @property
@@ -50,7 +52,8 @@ def {0}(self):
 def {0}(self, {0}):
     self._proto.{1} = {0}            
 """.format(to_snake_case(f), f)
-                    WARN(message)
+                    if message:
+                        WARN(message)
         cls.class_name = to_snake_case(trim(name, e='Item'))
 
 
@@ -69,7 +72,6 @@ class PluginItem(object):
     def __init__(self, uid=None, **kwargs):
         """
         Does NOT register PluginItem into Plugin.
-
         """
         # if uid is missing - create uid.
         if uid is None:
@@ -83,6 +85,7 @@ class PluginItem(object):
         # register in base
         uid_item.associated_items.append(self.class_name)
         # create dependant if missing
+        from source.core.personal_assistant import PluginMap
         for dependency in self.dependencies:
             if dependency not in uid_item.associated_items:
                 getattr(PluginMap[dependency.plgugin], get_generator_name(dependency.name))(uid=uid, **kwargs)
@@ -127,6 +130,19 @@ def get_generator_name(f):
     return "create_{}".format(f)
 
 
+def schedule_method(repeated=True):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            logging.debug("Decorating method for schedule")
+            return func(*args, **kwargs)
+
+        wrapper.for_schedule = True
+        wrapper.repeated = repeated
+        return wrapper
+
+    return decorator
+
+
 class PluginMeta(type):
     def __new__(mcs, name, bases, dct):
         res_bases = tuple(base for base in bases if not issubclass(base, PluginItem))
@@ -167,8 +183,15 @@ def {generator_name}(self, {attributes}):
                         attributes=attributes,
                         substituted_attributes=substituted_attributes
                     )
-            WARN(message)
+            if message:
+                WARN(message)
         cls.class_name = to_snake_case(name)
+
+        cls._tasks_to_schedule = {}
+        for k, v in six.iteritems(dct):
+            if hasattr(v, 'for_schedule'):  # decorated methods
+                logging.debug("Adding method '{}' to the schedule set of plugin '{}'".format(k, name))
+                cls._tasks_to_schedule[k] = v
 
 
 class Plugin(object):
@@ -188,7 +211,7 @@ class Plugin(object):
 
     def load_config(self):  # todo: move config loading to metaclass?
         # But i want to do it on launch so that i could re-launch plugin...
-        if os.path.exists(self._config_path):
+        if self._config_path and os.path.exists(self._config_path):
             self.config = load_config(self._config_path, self._config_type)
 
     # ----------------------------------------------------
@@ -218,6 +241,9 @@ class Plugin(object):
     # launch machinery
 
     def populate_schedule(self):
+        # todo: for task in self._tasks_to_schedule
+        # todo: what is the method to add task to schedule?
+        # todo: what is the time to add task at? Current?
         raise NotImplementedError
 
     def setup_callbacks(self):
@@ -281,3 +307,22 @@ class Plugin(object):
 
 class PluginItemDescription(TPluginItemDesctription):
     __metaclass__ = ProtobufInheritanceMeta
+
+    def __init__(self, plugin=None, name=None):
+        self._proto = self.proto_type(Plugin=plugin, Name=name)
+
+    @property
+    def plugin(self):
+        return self._proto.Plugin
+
+    @plugin.setter
+    def plugin(self, plugin):
+        self._proto.Plugin = plugin
+
+    @property
+    def name(self):
+        return self._proto.Name
+
+    @name.setter
+    def name(self, name):
+        self._proto.Name = name

@@ -8,10 +8,11 @@ from pyutils import WARN, to_utc_seconds
 
 
 class CallbackTask(object):
-    def __init__(self, callback, target_time=None, task_id=None):
+    def __init__(self, callback, target_time=None, task_id=None, is_recurring=True):
         self.callback = callback
         self.target_time = to_utc_seconds(target_time or time.time())
         self.id = task_id or Scheduler.generate_task_id(self)
+        self.is_recurring = is_recurring
 
     def __call__(self, *args, **kwargs):
         self.callback(*args, **kwargs)
@@ -24,8 +25,8 @@ class Scheduler(object):
         self._schedule = sortedcontainers.SortedDict()  # time -> (task, id)
         self._tasks = dict()  # id -> (task, timestamp)
 
-    def add_task(self, callback, target_time=None, task_id=None):
-        task = CallbackTask(callback, target_time=target_time, task_id=task_id)
+    def add_task(self, callback, target_time=None, task_id=None, is_recurring=True):
+        task = CallbackTask(callback, target_time=target_time, task_id=task_id, is_recurring=is_recurring)
         while task.target_time in self._schedule:
             WARN("Timestamp already in schedule. Incrementing by a microsecond")
             task.target_time += 1e-6
@@ -34,6 +35,7 @@ class Scheduler(object):
         return task
 
     def get_next_task(self):
+        # type: () -> CallbackTask
         _, task = self._schedule.peekitem(0)
         return task
 

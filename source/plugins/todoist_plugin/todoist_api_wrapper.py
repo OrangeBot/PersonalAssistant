@@ -4,7 +4,8 @@ import os
 import threading
 
 import dateutil
-from pyutils import connected_to_internet
+import six
+from pyutils import connected_to_internet, format_to_string, is_python_3
 from todoist import TodoistAPI
 from typing import Iterable
 
@@ -73,7 +74,7 @@ class Folder(object):
         if self.parent_id is None:
             return self.name
         else:
-            return "{}/{}".format(self.parent.path, self.name)
+            return "{}/{}".format(self.parent.path, format_to_string(self.name))
 
     @property
     def name(self):
@@ -103,7 +104,7 @@ class Folder(object):
         if commit:
             self.api.commit()
 
-    move = update_parent_id()
+    move = update_parent_id
 
 
 class Task(object):
@@ -151,6 +152,12 @@ class Task(object):
 
     # def path_is_allowed(self):
     #     return self.pa.
+
+    def register_child(self, folder):
+        self._children.add(folder.id)
+
+    def unregister_child(self, folder):
+        self._children.remove(folder.id)
 
     # ----------------------------------------------------------------
     # properties
@@ -249,7 +256,7 @@ class Task(object):
 
 
 class TodoistApiWrapper(object):
-    def __init__(self, token=None):
+    def __init__(self, token=None, allowed_paths=None):
         # self._api = TodoistAPI(token=token)
         assert Task._api_wrapper is None, "More than one instance of TodoistApiWrapper is created, crash."
         Task._api_wrapper = self
@@ -278,6 +285,8 @@ class TodoistApiWrapper(object):
         self._projects = {}
         self._folders = {}
         self._tasks = {}
+
+        self.configure_allowed_paths(allowed_paths=allowed_paths)
 
         self.sync_api()
         # ----------------------------------------------------------
@@ -342,17 +351,26 @@ class TodoistApiWrapper(object):
             """)
             except:
                 allowed_paths = ''
-            if allowed_paths == '':
-                allowed_paths = "personal assistant"
-            pp = [p.strip().strip('/') for p in allowed_paths.split(',')]
-            self._included_paths = [p for p in pp if not p.startswith('-')]
-            self._excluded_paths = [p[1:] for p in pp if p.startswith('-')]
-            if len(self._included_paths) == 0:
-                self._included_paths = [""]
+        if allowed_paths == '':
+            allowed_paths = "personal assistant"
+        if isinstance(allowed_paths, six.string_types):
+            allowed_paths = allowed_paths.split(',')
+        pp = [p.strip().strip('/') for p in allowed_paths]
+        self._included_paths = [p for p in pp if not p.startswith('-')]
+        self._excluded_paths = [p[1:] for p in pp if p.startswith('-')]
+        if len(self._included_paths) == 0:
+            self._included_paths = [""]
 
     def path_is_allowed(self, path):
-        return any([path.startswith(p) for p in self._included_paths]) and not any(
+        try:
+            return any([path.startswith(p) for p in self._included_paths]) and not any(
             [path.startswith(p) for p in self._excluded_paths])
+        except:
+            print(path)
+            print(p)
+            print(self._included_paths)
+            print(self._excluded_paths)
+
 
     @property
     def allowed_tasks(self):
@@ -375,9 +393,23 @@ class TodoistApiWrapper(object):
             if os.path.exists(api_token):
                 from pyutils import get_token
                 api_token = get_token(api_token)
-            self._api = TodoistAPI(api_token)
+            if True:
+                print("WARNING - using mock to generate mock.")
+                prototype = TodoistAPI(api_token)
+                engine = 'pkl'  # 'json' or 'pkl'
+                from secrets import lib_root
+                mock_path = os.path.join(lib_root, 'app_data', 'mock_TodoistAPI_py{}.{}'.format('3' if is_python_3() else '2', engine))
+                from pyutils import Mock
+                self._api = Mock(prototype, dump_path=mock_path, dump_engine=engine)
+            else:
+                self._api = TodoistAPI(api_token)
         else:
-            raise NotImplementedError("Todo - load mock todoist api client")
+            prototype = TodoistAPI()
+            engine = 'pkl'  # 'json' or 'pkl'
+            from secrets import lib_root
+            mock_path = os.path.join(lib_root, 'app_data', 'mock_TodoistAPI_py{}.{}'.format('3' if is_python_3() else '2', engine))
+            from pyutils import Mock
+            self._api = Mock(prototype, dump_path=mock_path, dump_engine=engine)
 
     def sync_api(self):
         with self._lock:
@@ -396,7 +428,6 @@ class TodoistApiWrapper(object):
             # self._last_api_sync_timestamp = datetime.datetime.now()
 
     def _process_items_updates(self):
-        # [
         # {
         #   'id': 955344370,
         #   'object_type': 'item',

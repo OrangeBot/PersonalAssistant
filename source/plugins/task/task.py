@@ -3,7 +3,32 @@ from source.plugins.base import PluginItem, Plugin
 
 
 class TaskItem(PluginItem, TTask):
-    pass
+    def __init__(self, uid=None, text=None, name=None):
+        super(TaskItem, self).__init__(uid=uid, text=text, name=name)
+
+    @property
+    def uid(self):
+        return self._proto.Uid
+
+    @uid.setter
+    def uid(self, uid):
+        self._proto.Uid = uid
+
+    @property
+    def text(self):
+        return self._proto.Text
+
+    @text.setter
+    def text(self, text):
+        self._proto.Text = text
+
+    @property
+    def name(self):
+        return self._proto.Name
+
+    @name.setter
+    def name(self, name):
+        self._proto.Name = name
 
 
 class Task(Plugin, TaskItem):

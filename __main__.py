@@ -6,8 +6,10 @@ from source.core.personal_assistant import PersonalAssistant
 
 
 def main(config_dir, app_data_dir, launch):
+    logging.info("Starting PersonalAssistant/__main__.py")
     pa = PersonalAssistant(config_dir=config_dir, app_data_dir=app_data_dir)
     if launch:
+        logging.info("Launching PA from PersonalAssistant/__main__.py")
         pa.run()
 
 
