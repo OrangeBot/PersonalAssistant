@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 import os
 from collections import defaultdict
@@ -71,6 +72,10 @@ class PluginItem(object):
 
     def __init__(self, uid=None, **kwargs):
         """
+        Create uid if missing
+        Create proto
+        Register in uid
+        Create dependencies
         Does NOT register PluginItem into Plugin.
         """
         # if uid is missing - create uid.
@@ -175,7 +180,7 @@ class PluginMeta(type):
                         "{0}={0}".format(to_snake_case(f)) for f in item_base.proto_fields)
                     message += """
 def {generator_name}(self, {attributes}):
-    {class_name} = self.create_item('{class_name}', {substituted_attributes})
+    {class_name} = self.create_item('{class_name}', {substituted_attributes})  # creates PluginItem(), registers in plugin.items, registers in uid
     return {class_name}
 """.format(
                         generator_name=generator_name,
@@ -295,13 +300,13 @@ class Plugin(object):
         """
         creates PluginItem  # done
         Saves item into plugin.items[item_type]  # done
-        registers item into uid.AssociatedItems  # done
+        NOT registers item into uid.AssociatedItems  # done
         """
         if uid is not None:
             assert uid not in self._items[item_class_name]
         item = self._items_types[item_class_name](uid=uid, **kwargs)  # calls costructor
         self._items[item_class_name][item.uid] = item  # saves item into plugin.items, 1. Regiester item in the plugin
-        self.pa.uid[item.uid].associated_items.append(item_class_name)
+        # self.pa.uid[item.uid].associated_items.append(item_class_name)
         return item
 
 

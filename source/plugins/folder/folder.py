@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from proto.folder_pb2 import TFolder
 from source.plugins.base import PluginItem, Plugin
 

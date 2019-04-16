@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 
 from pyutils import is_python_3, run_bg

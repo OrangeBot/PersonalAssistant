@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from proto.task_pb2 import TTask
 from source.plugins.base import PluginItem, Plugin
 

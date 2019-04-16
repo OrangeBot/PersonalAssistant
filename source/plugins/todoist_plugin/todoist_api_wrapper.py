@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # encoding: utf-8
 import itertools
 import os
@@ -5,7 +6,7 @@ import threading
 
 import dateutil
 import six
-from pyutils import connected_to_internet, format_to_string, is_python_3
+from pyutils import connected_to_internet, format_to_string, is_python_3, soft_encode
 from todoist import TodoistAPI
 from typing import Iterable
 
@@ -355,22 +356,21 @@ class TodoistApiWrapper(object):
             allowed_paths = "personal assistant"
         if isinstance(allowed_paths, six.string_types):
             allowed_paths = allowed_paths.split(',')
-        pp = [p.strip().strip('/') for p in allowed_paths]
+        pp = [soft_encode(p.strip().strip('/')) for p in allowed_paths]
         self._included_paths = [p for p in pp if not p.startswith('-')]
         self._excluded_paths = [p[1:] for p in pp if p.startswith('-')]
         if len(self._included_paths) == 0:
-            self._included_paths = [""]
+            self._included_paths = ["", ]
 
     def path_is_allowed(self, path):
         try:
             return any([path.startswith(p) for p in self._included_paths]) and not any(
-            [path.startswith(p) for p in self._excluded_paths])
+                [path.startswith(p) for p in self._excluded_paths])
         except:
             print(path)
             print(p)
             print(self._included_paths)
             print(self._excluded_paths)
-
 
     @property
     def allowed_tasks(self):

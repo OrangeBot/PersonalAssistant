@@ -175,29 +175,30 @@ class Todoist(Plugin, TodoistTaskItem, TodoistProjectItem):
         # todo: need to distinguish parent project and parent task. Path concept also gets complicated
         # if todoist id is None - need to create at todoist. else already created
         # if uid is None need to create at base. Else already exists.
-        if uid is None:
-            uid = self.pa.get_plugin('task').create_task(text=text)
+        # if uid is None:
+        #     uid = self.pa.get_plugin('task').create_task(text=text)
         if todoist_id is None:  # todo: implement custom project
             todoist_id = self._api.items.add(content=text, project_id=None)
         self.items['task'][uid] = TodoistTaskItem(text=text, uid=uid, todoist_id=todoist_id, project_id=project_id)
 
     def create_project(self, name, uid=None, todoist_id=None):
-        logging.warn("Need to re-check 'create_project' method - it's not up to date.")
-        if uid is None:
-            uid = self.pa.plugins['folder'].create(name=name)  # todo verify that there is uid here
-            assert uid in self.pa.plugins['folder'].items['folder']
+        # logging.warn("Need to re-check 'create_project' method - it's not up to date.")
+        # if uid is None:
+        #     uid = self.pa.plugins['folder'].create(name=name)  # todo verify that there is uid here
+        #     assert uid in self.pa.plugins['folder'].items['folder']
         if todoist_id is None:  # todo: implement custom project
             todoist_id = self._api.projects.add(name=name)
             # todo: verify that this is an id of
         project = TodoistProjectItem(uid=uid, todoist_id=todoist_id)
         return project
 
-    def create_todoist_task(self, uid=None, todoist_id=None, schedule=None, due_date=None):
-        todoist_task = self.create_item('todoist_task', uid=uid, todoist_id=todoist_id, schedule=schedule, due_date=due_date)
+    def create_todoist_task(self, uid=None, todoist_id=None, text=None, schedule=None, due_date=None, parent=None):
+        todoist_task = self.create_item('todoist_task', uid=uid, todoist_id=todoist_id, text=text, schedule=schedule, due_date=due_date,
+                                        parent=parent)  # creates PluginItem(), registers in plugin.items, registers in uid
         return todoist_task
 
     def create_todoist_project(self, uid=None, todoist_id=None, name=None, parent=None):
-        todoist_project = self.create_item('todoist_project', uid=uid, todoist_id=todoist_id, name=name, parent=parent)
+        todoist_project = self.create_item('todoist_project', uid=uid, todoist_id=todoist_id, name=name, parent=parent)  # creates PluginItem(), registers in plugin.items, registers in uid
         return todoist_project
     # -----------------------------------------------------------------
     # scheduled events
@@ -209,7 +210,7 @@ class Todoist(Plugin, TodoistTaskItem, TodoistProjectItem):
         #     if task.permitted
         for task in self.api.allowed_tasks:
             if task.id not in self.todoist_id_map:
-                self.create_task(todoist_id=task.id, text=task.text)
+                self.create_todoist_task(todoist_id=task.id, text=task.text)
         # todo: go over local items. Create missing?
 
     def populate_schedule(self):

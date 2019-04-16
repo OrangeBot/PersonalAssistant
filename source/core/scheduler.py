@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # # try to emulate necessary scheduler behavior
 
 import random

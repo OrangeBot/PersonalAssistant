@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import uuid
 
 from proto.uid_pb2 import TUid
