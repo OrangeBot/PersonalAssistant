@@ -1,0 +1,14 @@
+1) pa.run()
+Database - on __exit__ save all plugins data and
+
+2) In each plugin have map name -> item_type
+
+3) in pa have map name -> plugin
+
+-- Todoist
+4) on init - connect to todoist api
+
+5) load all proto files from database
+-> plugin.items[name]
+
+6) sync - look what we have and what
